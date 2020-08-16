@@ -1,2 +1,2 @@
 # Arkanoid
-Игра Arkanoid на python
+Игра Arkanoid на Python
