@@ -1,17 +1,16 @@
 import pygame
-
-pygame.init()
 from random import randint  # Случайные целые числа в диапазоне
 from time import sleep  # Задержка
-
 import arklogs as logs  # Модуль для работы с log файлом
 from arkconfig import log_file_name  # Имя log файла игры
+
+pygame.init()
 
 
 class Player(pygame.sprite.Sprite):
     # Эффекты: (без эффекта), (красный), (фиолетовый), (голубой)
     effects = (
-        (84, 55, 212),
+        (70, 216, 232),
         (207, 70, 70),
         (208, 0, 255),
         (140, 218, 230))
@@ -27,8 +26,8 @@ class Player(pygame.sprite.Sprite):
             centerx=pl_x,
             centery=630 - self.__radius)  # Rect по поверхности
         self.__is_free = False  # Свободно летает / приклеен к платформе
-        self.__const_speed = (1.5, 4.5)  # Обычная(без эффектов) скорость (x, y)
-        self.__speed = [0.0, 0.0]  # Текущая скорость (x, y)
+        self.__SPEED = (1.0, 4.0)  # Обычная(без эффектов) скорость (x, y)
+        self.__cur_speed = [0.0, 0.0]  # Текущая скорость (x, y)
         # Направление (-1 - вверх / влево, -1 - вниз / вправо, 0 - стоп)
         self.__direction = [0, 0]
         self.__full_lives = 3  # Полное кол-во жизней
@@ -65,8 +64,8 @@ class Player(pygame.sprite.Sprite):
 
     def set_speed(self, k):
         """Установление скорости в зависимости от коэффициетка k"""
-        self.__speed[0] = self.__const_speed[0] * k
-        self.__speed[1] = self.__const_speed[1] * k
+        self.__cur_speed[0] = self.__SPEED[0] * k
+        self.__cur_speed[1] = self.__SPEED[1] * k
 
     def activation(self):
         """Активация игрока"""
@@ -74,17 +73,14 @@ class Player(pygame.sprite.Sprite):
         self.__direction = [-1, -1]
         self.set_speed(1.0)
 
-    def check_hit(self, left, right):
+    def check_platform_hit(self, left, right):
+        """Проверка на столкновение с платформой"""
         x_coord = (self.__rect.right >= left and
                    self.__rect.left <= right) or self.__inf_mod
-        y_coord = 630 < self.__rect.bottom + self.__speed[1] <= 660
+        y_coord = 630 < self.__rect.bottom + self.__cur_speed[1] <= 660
         return x_coord and y_coord
 
-    # pl_x = platform.rect.centerx
-    # pl_left = platform.rect.left
-    # pl_right = platform.rect.right
-
-    def update(self, pl_x, pl_left, pl_right, mobs_hit_list):
+    def update(self, pl_rect, collision_with_mobs):
         """
         Обновление параметров игрока игрока
         1) Если игрок "приклеен" к платформе, перемещается вместе с ней
@@ -101,8 +97,8 @@ class Player(pygame.sprite.Sprite):
             return randint(-t, t)
 
         if not self.__is_free:  # Если приклеен к платформе, движ. вместе с ней
-            self.__rect.centerx = pl_x
-            self.__speed = [0, 0]
+            self.__rect.centerx = pl_rect.centerx
+            self.__cur_speed = [0, 0]
         else:
             if self.__rect.left <= 20:  # Столкновение с левой стенкой
                 self.__rect.left = 21
@@ -131,24 +127,27 @@ class Player(pygame.sprite.Sprite):
                 with open(log_file_name, "w") as file:
                     logs.print_message(file, "TOP \n")
 
-            if self.check_hit(pl_left, pl_right):  # Столкновение с платформой
+            # Столкновение с платформой
+            if self.check_platform_hit(pl_rect.left, pl_rect.right):
                 self.__rect.bottom = 630
                 self.__direction[1] = -self.__direction[1]
                 with open(log_file_name, "w") as file:
                     logs.print_message(file, "PLATFORM \n")
 
-            if len(mobs_hit_list) != 0:  # Отражение ирока от моба
+            if collision_with_mobs:  # Отражение ирока от моба
                 self.__direction[1] = -self.__direction[1]
                 self.rect.centerx += randint(-3, 3)
+                # Смещение вниз. Избегем повторного удара
+                self.rect.centery += 5
 
             # Изменение координат
-            self.__rect.centerx += self.__speed[0] * self.__direction[0]
-            self.__rect.centery += self.__speed[1] * self.__direction[1]
+            self.__rect.centerx += self.__cur_speed[0] * self.__direction[0]
+            self.__rect.centery += self.__cur_speed[1] * self.__direction[1]
 
             if self.__rect.bottom > 670:  # Вылет за нижн. границу игрового поля
                 self.__lives -= 1
                 self.__direction = [0, 0]
                 # Задержка перед возвращением на платформу (в секундах)
                 sleep(0.05)
-                self.__rect.center = (pl_x, 630 - self.__radius)
+                self.__rect.center = (pl_rect.centerx, 630 - self.__radius)
                 self.__is_free = False

@@ -25,6 +25,7 @@ def finish(is_win, score):
         message=phrases.ask_restart)  # Начинать ли игру с начала (True / False)
     return answer
 
+
 def restart():
-    return tkinter.messagebox.askyesno(title=f"Рестарт",
-                                                     message="Перезапустить?")
+    return tkinter.messagebox.askyesno(title=phrases.restart,
+                                       message=phrases.ask_restart)

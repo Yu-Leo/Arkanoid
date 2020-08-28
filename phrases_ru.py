@@ -7,6 +7,7 @@ you_win = "Вы выиграли!"
 you_lose = "Вы проиграли!"
 ask_restart = "Начать заново?"
 
+restart = "Перезапуск"
 
 def your_score(score):
     return f"Ваш счёт: {score}"

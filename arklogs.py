@@ -12,13 +12,12 @@ def print_mobsMatrix(file, mobs_matrix):
 def print_start_info(file, start_info):
     """
     Вывод начальной информации
-    info: game_mod, all_mobs_lines, visible_mobs_lines, mobs_matrix, all_points
+    info: game_mod, all_mobs_lines, mobs_matrix, all_points
     """
     file.write(f"Режим игры: {start_info[0]}\n")
     file.write(f"Генерируемых рядов: {start_info[1]}\n")
-    file.write(f"Видимых рядов: {start_info[2]}\n")
-    print_mobsMatrix(file, start_info[3])
-    file.write(f"Необходимо очков для победы: {start_info[4]}\n")
+    print_mobsMatrix(file, start_info[2])
+    file.write(f"Необходимо очков для победы: {start_info[3]}\n")
 
 
 def print_player_info(file, player):

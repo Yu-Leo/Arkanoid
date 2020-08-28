@@ -1,6 +1,7 @@
 # Модуль для отображения игровых элементов
 
 import pygame
+
 pygame.init()
 
 font = pygame.font.SysFont("arialblack", 28, 0, 0)  # Основной шрифт

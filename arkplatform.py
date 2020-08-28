@@ -1,13 +1,14 @@
 import pygame
-pygame.init()
 from random import randint
+
+pygame.init()
 
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.__default_sizes = [70, 14]  # Размеры по умолчанию
-        self.__sizes = self.__default_sizes  # Текущие размеры
+        self.__SIZES = [70, 14]  # Размеры по умолчанию
+        self.__sizes = self.__SIZES  # Текущие размеры
         self._color = (70, 216, 232)
         self.__image = pygame.Surface(
             self.__sizes, pygame.SRCALPHA)  # Прозрачная поверхность
@@ -24,7 +25,7 @@ class Platform(pygame.sprite.Sprite):
 
     def draw(self, sc):
         """Отрисовка платформы на поле"""
-        coords = self.rect.center
+        coords = self.__rect.center
         self.__rect = self.__image.get_rect(center=coords)
         pygame.draw.rect(self.__image, self._color,
                          (0, 0, self.__sizes[0], self.__sizes[1] - 5))
